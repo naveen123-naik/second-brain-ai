@@ -1,0 +1,55 @@
+# Virtual environments
+.venv*/
+venv/
+ENV/
+env/
+
+# Dependency directories
+node_modules/
+jspm_packages/
+web_stage/
+
+# Secrets and environment configurations
+.env
+.env.*
+!.env.example
+client_secret.json
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+
+# IDE / Editor configurations
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Local databases and FAISS indexes
+backend/vector_db/
+backend/vector_db_*/
+backend/vectorstore/
+backend/data/
+backend/uploads/
+backend/logs/
+*.log
+backend/voice.wav
+backend/temp_*.mp3
+backend/temp_*.pdf

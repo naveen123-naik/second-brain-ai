@@ -1,0 +1,328 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #0b0a10;
+    color: #e9e6f9;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .dot-pattern {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -12px -12px;
+  }
+
+  .ghost-border {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .ghost-border-r {
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .ghost-border-active {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .glass-card {
+    background-color: rgba(18, 17, 28, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(182, 160, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(182, 160, 255, 0.05);
+  }
+
+  .text-gradient {
+    background-image: linear-gradient(135deg, #b6a0ff, #00affe);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .bg-primary-gradient {
+    background-image: linear-gradient(135deg, #b6a0ff, #00affe);
+  }
+
+  .ask-ai-input {
+    background-color: #12101a;
+    border-radius: 1.2rem;
+    box-shadow: 0 20px 50px rgba(182, 160, 255, 0.05);
+    border: 1px solid rgba(182, 160, 255, 0.2);
+  }
+
+  .ask-ai-input:focus-within {
+    box-shadow: 0 0 25px rgba(182, 160, 255, 0.15);
+    border-color: rgba(182, 160, 255, 0.4);
+  }
+
+  /* ═══════════════════════════════════════════
+     PREMIUM MARKDOWN BODY — Full Format System
+     ═══════════════════════════════════════════ */
+
+  .markdown-body {
+    line-height: 1.75;
+    color: #e9e6f9;
+  }
+
+  /* — Headings — */
+  .markdown-body h1 {
+    font-size: 1.5em;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    background: linear-gradient(135deg, #b6a0ff, #00affe);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-top: 1.2em;
+    margin-bottom: 0.4em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px solid rgba(182, 160, 255, 0.2);
+  }
+
+  .markdown-body h2 {
+    font-size: 1.2em;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: #b6a0ff;
+    margin-top: 1.4em;
+    margin-bottom: 0.5em;
+    display: flex;
+    align-items: center;
+    gap: 0.4em;
+  }
+
+  .markdown-body h3 {
+    font-size: 1.05em;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: #00affe;
+    margin-top: 1.2em;
+    margin-bottom: 0.4em;
+  }
+
+  .markdown-body h4 {
+    font-size: 0.95em;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: #e966ff;
+    margin-top: 1em;
+    margin-bottom: 0.3em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* — Paragraphs — */
+  .markdown-body p {
+    margin-bottom: 0.9em;
+    color: #d4d0ea;
+  }
+
+  .markdown-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* — Lists — */
+  .markdown-body ul,
+  .markdown-body ol {
+    margin-left: 1.4em;
+    margin-bottom: 1em;
+  }
+
+  .markdown-body ul {
+    list-style-type: none;
+  }
+
+  .markdown-body ul > li {
+    position: relative;
+    padding-left: 1.2em;
+  }
+
+  .markdown-body ul > li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #b6a0ff;
+    font-size: 0.75em;
+    top: 0.15em;
+  }
+
+  .markdown-body ol {
+    list-style-type: decimal;
+  }
+
+  .markdown-body ol > li {
+    padding-left: 0.4em;
+  }
+
+  .markdown-body li {
+    margin-bottom: 0.35em;
+    color: #d4d0ea;
+  }
+
+  /* — Bold & Emphasis — */
+  .markdown-body strong {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .markdown-body em {
+    color: #aba9bb;
+    font-style: italic;
+  }
+
+  /* — Horizontal Rule — */
+  .markdown-body hr {
+    border: 0;
+    border-top: 1px solid rgba(182, 160, 255, 0.15);
+    margin: 1.6em 0;
+  }
+
+  /* — Code Blocks — */
+  .markdown-body pre {
+    background: linear-gradient(135deg, #0d0c18, #12101e);
+    border: 1px solid rgba(182, 160, 255, 0.15);
+    border-left: 3px solid #b6a0ff;
+    border-radius: 0.6rem;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1em;
+    overflow-x: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .markdown-body pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    font-size: 0.875em;
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: #c4b5fd;
+  }
+
+  .markdown-body code {
+    background: rgba(182, 160, 255, 0.12);
+    border: 1px solid rgba(182, 160, 255, 0.2);
+    padding: 0.15em 0.45em;
+    border-radius: 0.3rem;
+    font-size: 0.875em;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    color: #c4b5fd;
+  }
+
+  /* — Blockquotes (Callout/Alert boxes) — */
+  .markdown-body blockquote {
+    background: rgba(182, 160, 255, 0.05);
+    border: 1px solid rgba(182, 160, 255, 0.2);
+    border-left: 4px solid #b6a0ff;
+    border-radius: 0 0.5rem 0.5rem 0;
+    padding: 0.8rem 1.2rem;
+    margin: 1.2em 0;
+    color: #c4b0ff;
+    font-style: normal;
+  }
+
+  .markdown-body blockquote p {
+    margin-bottom: 0;
+    color: #c4b0ff;
+  }
+
+  .markdown-body blockquote strong {
+    color: #b6a0ff;
+  }
+
+  /* — Tables — */
+  .markdown-body table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.2em 0;
+    font-size: 0.88em;
+    border-radius: 0.6rem;
+    overflow: hidden;
+    border: 1px solid rgba(182, 160, 255, 0.15);
+  }
+
+  .markdown-body thead {
+    background: linear-gradient(135deg, rgba(182, 160, 255, 0.15), rgba(0, 175, 254, 0.1));
+  }
+
+  .markdown-body th {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    color: #b6a0ff;
+    text-transform: uppercase;
+    font-size: 0.78em;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid rgba(182, 160, 255, 0.2);
+  }
+
+  .markdown-body td {
+    padding: 0.65rem 1rem;
+    color: #d4d0ea;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    vertical-align: top;
+  }
+
+  .markdown-body tbody tr {
+    transition: background 0.2s ease;
+  }
+
+  .markdown-body tbody tr:hover {
+    background: rgba(182, 160, 255, 0.04);
+  }
+
+  .markdown-body tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* — Links — */
+  .markdown-body a {
+    color: #00affe;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color 0.2s;
+  }
+
+  .markdown-body a:hover {
+    color: #b6a0ff;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Make browser native datetime-local picker icon white and hoverable on dark background */
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+  input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
+
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .animate-spin-slow {
+    animation: spin-slow 12s linear infinite;
+  }
+}
