@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { BrowserRouter, Routes, Route, Outlet, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, useNavigate, Navigate } from "react-router-dom";
 import API from "./api/api";
 
 import Layout from "./components/Layout";
@@ -22,39 +22,60 @@ const Help = lazy(() => import("./pages/Help"));
 const ProtectedRoute = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading");
-  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await API.get("/auth/me");
-        if (!res.data.is_verified) {
-          setUserEmail(res.data.email);
-          setStatus("unverified");
-        } else {
-          localStorage.setItem("email", res.data.email);
-          localStorage.setItem("role", res.data.role);
-          localStorage.setItem("profile_name", res.data.name);
-          localStorage.setItem("profile_pic", res.data.profile_picture || "");
-          setStatus("authenticated");
-        }
+        localStorage.setItem("email", res.data.email);
+        localStorage.setItem("role", res.data.role);
+        localStorage.setItem("profile_name", res.data.name);
+        localStorage.setItem("profile_pic", res.data.profile_picture || "");
+        setStatus("authenticated");
       } catch (err) {
-        setStatus("unauthenticated");
+        // Automatically attempt background login if unauthenticated
+        try {
+          const loginRes = await API.post("/auth/login", {
+            email: "kethavathnaveennaik1234@gmail.com",
+            password: "Naveen@123//"
+          });
+          const { access_token, refresh_token, email, role } = loginRes.data;
+          localStorage.setItem("access_token", access_token);
+          localStorage.setItem("refresh_token", refresh_token);
+          localStorage.setItem("email", email);
+          localStorage.setItem("role", role);
+
+          // Get profile details
+          const meRes = await API.get("/auth/me");
+          localStorage.setItem("profile_name", meRes.data.name);
+          localStorage.setItem("profile_pic", meRes.data.profile_picture || "");
+          setStatus("authenticated");
+        } catch (loginErr) {
+          console.error("Auto-login failed:", loginErr);
+          setStatus("unauthenticated");
+        }
       }
     };
     checkAuth();
   }, [navigate]);
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      navigate("/login");
-    } else if (status === "unverified") {
-      navigate("/verify-email", { state: { email: userEmail } });
-    }
-  }, [status, navigate, userEmail]);
-
   if (status === "loading") {
     return <Loading />;
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-[#0b0a10] text-white">
+        <h2 className="text-xl font-bold mb-2">Vault Connection Failed</h2>
+        <p className="text-xs text-white/50 mb-4">Could not establish background connection with the default profile.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-xs font-semibold"
+        >
+          RETRY CONNECTION
+        </button>
+      </div>
+    );
   }
 
   return status === "authenticated" ? <Outlet /> : null;
@@ -71,11 +92,12 @@ function App() {
     <BrowserRouter>
       <Suspense fallback={<Loading />}>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
+          {/* Redirect authentication routes to home since login is removed */}
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/signup" element={<Navigate to="/" replace />} />
+          <Route path="/forgot-password" element={<Navigate to="/" replace />} />
+          <Route path="/reset-password" element={<Navigate to="/" replace />} />
+          <Route path="/verify-email" element={<Navigate to="/" replace />} />
           
           <Route element={<ProtectedRoute />}>
             <Route element={<Layout />}>

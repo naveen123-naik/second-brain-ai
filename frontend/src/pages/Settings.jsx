@@ -214,7 +214,6 @@ function Settings() {
 
   const tabs = [
     { id: "account", name: "👤 Account", icon: User },
-    { id: "security", name: "🔐 Security", icon: Shield },
     { id: "appearance", name: "🎨 Appearance", icon: Sun },
     { id: "ai", name: "🤖 AI Preferences", icon: Sparkles },
     { id: "memory", name: "🧠 Memory", icon: Brain },
@@ -314,54 +313,6 @@ function Settings() {
                 SAVE PROFILE DETAILS
               </button>
             </form>
-
-            <div className="h-[1px] w-full bg-white/5 my-6"></div>
-
-            {/* Change Password */}
-            <form onSubmit={handleChangePassword} className="space-y-4">
-              <h4 className="text-sm font-semibold text-white">Update Encryption Cipher</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-mono tracking-widest text-[#aba9bb] uppercase block mb-1.5 pl-1">Current Password</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••••••"
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full bg-[#121220] border border-white/10 text-white rounded-lg p-3 text-xs outline-none focus:border-[#b6a0ff]/50 font-sans"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-mono tracking-widest text-[#aba9bb] uppercase block mb-1.5 pl-1">New Password</label>
-                  <input
-                    type="password"
-                    placeholder="••••••••••••"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-[#121220] border border-white/10 text-white rounded-lg p-3 text-xs outline-none focus:border-[#b6a0ff]/50 font-sans"
-                  />
-                </div>
-              </div>
-              <button type="submit" className="bg-[#121220] hover:bg-[#1e1e2f] text-[#b6a0ff] border border-[#b6a0ff]/20 hover:border-[#b6a0ff]/40 px-6 py-2.5 rounded-lg text-xs font-semibold transition-all">
-                UPDATE VAULT PASSPHRASE
-              </button>
-            </form>
-
-            <div className="h-[1px] w-full bg-white/5 my-6"></div>
-
-            {/* Delete Account */}
-            <div className="p-5 rounded-xl border border-red-500/20 bg-red-500/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h4 className="text-sm font-semibold text-red-400">Purge Vault Node (Delete Account)</h4>
-                <p className="text-xs text-[#aba9bb] mt-0.5 font-light">Irreversibly delete your account, indexing files, and conversation logs.</p>
-              </div>
-              <button 
-                onClick={handleDeleteAccount}
-                className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-5 py-2.5 rounded-lg text-xs font-semibold transition-colors"
-              >
-                DELETE ACCOUNT
-              </button>
-            </div>
           </div>
         )}
 
