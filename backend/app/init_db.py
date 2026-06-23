@@ -35,7 +35,7 @@ finally:
 print("Provisioning default admin account...")
 db = SessionLocal()
 try:
-    admin_email = "kethavathnaiknaveen1234@gmail.com"
+    admin_email = "kethavathnaveennaik1234@gmail.com"
     existing_admin = db.query(User).filter(User.email == admin_email).first()
     if not existing_admin:
         new_admin = User(
