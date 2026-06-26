@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -9,11 +10,26 @@ import {
   Settings,
   HelpCircle,
   Network,
-  ShieldAlert
+  ShieldAlert,
+  Trash2,
+  MoreVertical
 } from "lucide-react";
 
-function Sidebar({ chatHistory = [], restoreSession, startNewChat }) {
+function Sidebar({ chatHistory = [], restoreSession, startNewChat, onDeleteHistoryItem }) {
   const location = useLocation();
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (openMenuId !== null) {
+        if (!e.target.closest(".sidebar-menu-trigger")) {
+          setOpenMenuId(null);
+        }
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [openMenuId]);
 
   const primaryLinks = [
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
@@ -33,7 +49,16 @@ function Sidebar({ chatHistory = [], restoreSession, startNewChat }) {
   return (
     <div className="w-64 h-screen bg-[#0B0A10] ghost-border-r relative flex flex-col pt-8 pb-6 z-50">
       <div className="px-6 mb-10 flex items-center gap-3">
-        <Network className="w-8 h-8 text-[#b6a0ff]" />
+        <div className="w-9 h-9 rounded-full overflow-hidden border border-[#b6a0ff]/20 shadow-[0_0_12px_rgba(182,160,255,0.3)] bg-black/40 flex items-center justify-center flex-shrink-0">
+          <video 
+            src={`${import.meta.env.BASE_URL}logo.mp4`} 
+            autoPlay 
+            loop 
+            muted 
+            playsInline 
+            className="w-full h-full object-cover scale-110"
+          />
+        </div>
         <h1 className="font-display font-bold text-xl tracking-wider text-white">
           ARCHIVIST
         </h1>
@@ -80,14 +105,50 @@ function Sidebar({ chatHistory = [], restoreSession, startNewChat }) {
             <h4 className="text-[10px] font-mono tracking-widest text-white/40 uppercase mb-3 px-2">Recent Transmits</h4>
             <div className="flex flex-col gap-0.5">
               {chatHistory.map((entry, i) => (
-                <button
-                  key={i}
-                  onClick={() => restoreSession && restoreSession(entry)}
-                  className="w-full text-left text-white/60 text-xs hover:text-white transition-colors cursor-pointer hover:bg-white/[0.04] px-2 py-2.5 rounded-lg flex items-center gap-3 border border-transparent hover:border-white/5 group"
+                <div
+                  key={entry.id || i}
+                  className="w-full text-white/60 text-xs hover:text-white transition-colors hover:bg-white/[0.04] px-2 py-2 rounded-lg flex items-center justify-between border border-transparent hover:border-white/5 group relative"
                 >
-                  <MessageSquare className="w-3.5 h-3.5 text-[#a882ff] shrink-0 group-hover:text-[#c4a8ff] transition-colors" />
-                  <span className="truncate">{entry.question}</span>
-                </button>
+                  <button
+                    onClick={() => restoreSession && restoreSession(entry)}
+                    className="flex-1 text-left flex items-center gap-3 truncate cursor-pointer bg-transparent border-none text-inherit p-0"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 text-[#a882ff] shrink-0 group-hover:text-[#c4a8ff] transition-colors" />
+                    <span className="truncate pr-8">{entry.question}</span>
+                  </button>
+                  {entry.id && onDeleteHistoryItem && (
+                    <div className={`absolute right-2 top-1/2 -translate-y-1/2 ${openMenuId === entry.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity z-20 sidebar-menu-trigger`}>
+                      <div className="relative">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenMenuId(openMenuId === entry.id ? null : entry.id);
+                          }}
+                          className="p-1 hover:bg-white/10 rounded text-white/40 hover:text-white cursor-pointer"
+                          title="Options"
+                        >
+                          <MoreVertical className="w-3.5 h-3.5" />
+                        </button>
+                        
+                        {openMenuId === entry.id && (
+                          <div className="absolute right-0 mt-1 w-28 rounded-lg bg-[#13111C]/95 backdrop-blur-md border border-white/10 shadow-2xl py-1 z-30">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteHistoryItem(entry.id);
+                                setOpenMenuId(null);
+                              }}
+                              className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/5 hover:text-red-300 transition-colors flex items-center gap-2 cursor-pointer"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           </div>

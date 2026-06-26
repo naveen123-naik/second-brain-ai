@@ -35,7 +35,7 @@ function Settings() {
   const [memoryEnabled, setMemoryEnabled] = useState(localStorage.getItem("memory_enabled") !== "false");
   const [savedMemories, setSavedMemories] = useState([
     { id: 1, text: "User prefers clean, modern dark mode interfaces." },
-    { id: 2, text: "Admin credentials seeded for naiknaveen." },
+    { id: 2, text: "Admin credentials seeded successfully." },
     { id: 3, text: "Preferred language is English." }
   ]);
   

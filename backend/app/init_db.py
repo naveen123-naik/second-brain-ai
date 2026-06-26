@@ -32,39 +32,59 @@ except Exception as e:
 finally:
     db_migration.close()
 
-print("Provisioning default admin account...")
+print("Provisioning default admin accounts...")
 db = SessionLocal()
 try:
-    admin_email = "kethavathnaveennaik1234@gmail.com"
-    existing_admin = db.query(User).filter(User.email == admin_email).first()
-    if not existing_admin:
-        new_admin = User(
-            email=admin_email,
-            hashed_password=hash_password("Naveen@123//"),
-            name="Naik Naveen",
-            auth_provider="email",
-            profile_picture="https://api.dicebear.com/7.x/bottts/svg?seed=Archivist",
-            role="admin",
-            is_active=True,
-            is_verified=True
-        )
-        db.add(new_admin)
-        db.commit()
-        print(f"Admin account ({admin_email}) provisioned successfully.")
-    else:
-        # Update password and status in case it was created with different parameters
-        existing_admin.hashed_password = hash_password("Naveen@123//")
-        existing_admin.name = "Naik Naveen"
-        existing_admin.auth_provider = "email"
-        if not existing_admin.profile_picture:
-            existing_admin.profile_picture = "https://api.dicebear.com/7.x/bottts/svg?seed=Archivist"
-        existing_admin.is_active = True
-        existing_admin.is_verified = True
-        existing_admin.role = "admin"
-        db.commit()
-        print(f"Admin account ({admin_email}) updated successfully.")
+    import os
+    admins = [
+        {
+            "email": "admin@example.com",
+            "password": "AdminSecurePassword123!",
+            "name": "Admin User"
+        }
+    ]
+    
+    env_email = os.getenv("ADMIN_EMAIL")
+    if env_email and env_email != "admin@example.com":
+        admins.append({
+            "email": env_email,
+            "password": os.getenv("ADMIN_PASSWORD", "AdminSecurePassword123!"),
+            "name": os.getenv("ADMIN_NAME", "Admin User")
+        })
+        
+    for admin_data in admins:
+        email = admin_data["email"]
+        password = admin_data["password"]
+        name = admin_data["name"]
+        
+        existing_admin = db.query(User).filter(User.email == email).first()
+        if not existing_admin:
+            new_admin = User(
+                email=email,
+                hashed_password=hash_password(password),
+                name=name,
+                auth_provider="email",
+                profile_picture="https://api.dicebear.com/7.x/bottts/svg?seed=Archivist",
+                role="admin",
+                is_active=True,
+                is_verified=True
+            )
+            db.add(new_admin)
+            db.commit()
+            print(f"Admin account ({email}) provisioned successfully.")
+        else:
+            existing_admin.hashed_password = hash_password(password)
+            existing_admin.name = name
+            existing_admin.auth_provider = "email"
+            if not existing_admin.profile_picture:
+                existing_admin.profile_picture = "https://api.dicebear.com/7.x/bottts/svg?seed=Archivist"
+            existing_admin.is_active = True
+            existing_admin.is_verified = True
+            existing_admin.role = "admin"
+            db.commit()
+            print(f"Admin account ({email}) updated successfully.")
 except Exception as e:
-    print("Failed to provision admin account:", e)
+    print("Failed to provision admin accounts:", e)
     db.rollback()
 finally:
     db.close()

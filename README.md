@@ -248,7 +248,7 @@ Built a full-stack AI assistant using FastAPI, React, and OpenAI with RAG pipeli
 
 ## 👨‍💻 Author
 
-Naveen
+Contributor
 
 ---
 

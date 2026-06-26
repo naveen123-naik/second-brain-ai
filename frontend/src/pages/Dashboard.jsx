@@ -45,14 +45,29 @@ function Dashboard() {
 
     setLoading(true);
     setActiveView("chat");
+    const startTime = Date.now();
     try {
       const res = await API.post("/chat", { question: userQ });
       const aiAnswer = res.data.answer || "No response received.";
+
+      // Enforce minimum 4 seconds loading delay
+      const elapsed = Date.now() - startTime;
+      const remaining = 4000 - elapsed;
+      if (remaining > 0) {
+        await new Promise(resolve => setTimeout(resolve, remaining));
+      }
+
       setMessages(prev => [...prev, { role: "assistant", text: aiAnswer }]);
       // Save the full Q&A pair to history
       addQuery?.(userQ, aiAnswer);
     } catch (err) {
       console.error(err);
+      // Guarantee minimum loading visual duration on error
+      const elapsed = Date.now() - startTime;
+      const remaining = 4000 - elapsed;
+      if (remaining > 0) {
+        await new Promise(resolve => setTimeout(resolve, remaining));
+      }
       const errMsg = "ERROR: NEURAL_LINK_FAILED";
       setMessages(prev => [...prev, { role: "assistant", text: errMsg }]);
       addQuery?.(userQ, errMsg);
@@ -102,12 +117,27 @@ function Dashboard() {
           ))}
           
           {loading && (
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#13111C] border border-[#2A2A35] flex items-center justify-center flex-shrink-0">
-                <div className="w-5 h-5 border-2 border-[#a882ff] border-t-transparent rounded-full animate-spin"></div>
+            <div className="flex items-start gap-4 animate-in fade-in duration-300">
+              <div className="w-10 h-10 rounded-full border border-[#2A2A35] bg-black flex items-center justify-center flex-shrink-0 overflow-hidden shadow-glow-primary">
+                <video
+                  src={`${import.meta.env.BASE_URL}logo.mp4`}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover scale-110"
+                />
               </div>
-              <div className="bg-[#13111C] border border-[#2A2A35] px-6 py-5 rounded-2xl rounded-tl-sm text-white/80 leading-relaxed min-w-[200px]">
-                Processing query across neural nodes...
+              <div className="bg-[#13111C] border border-[#2A2A35] px-6 py-5 rounded-2xl rounded-tl-sm text-white/80 leading-relaxed min-w-[220px] flex flex-col gap-2 shadow-ambient">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#a882ff] animate-pulse shadow-[0_0_6px_#a882ff]"></div>
+                  <span className="text-[10px] text-[#a882ff] font-mono tracking-wider uppercase">Processing query across neural nodes...</span>
+                </div>
+                <div className="flex items-center gap-1.5 pl-3.5">
+                  <div className="w-2 h-2 rounded-full bg-[#a882ff] animate-bounce"></div>
+                  <div className="w-2 h-2 rounded-full bg-[#a882ff]/60 animate-bounce delay-100"></div>
+                  <div className="w-2 h-2 rounded-full bg-[#a882ff]/30 animate-bounce delay-200"></div>
+                </div>
               </div>
             </div>
           )}
@@ -118,8 +148,15 @@ function Dashboard() {
     // Default home
     return (
       <div className="flex flex-col items-center justify-center flex-1 w-full max-w-4xl mt-[8vh]">
-        <div className="w-16 h-16 rounded-full bg-[#1A162B] border border-[#a882ff]/30 flex items-center justify-center shadow-[0_0_20px_rgba(168,130,255,0.2)] mb-8">
-          <Sparkles className="w-8 h-8 text-[#a882ff]" />
+        <div className="w-20 h-20 rounded-full border border-[#a882ff]/30 bg-black flex items-center justify-center shadow-[0_0_20px_rgba(168,130,255,0.2)] mb-8 overflow-hidden">
+          <video
+            src={`${import.meta.env.BASE_URL}logo.mp4`}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover scale-110"
+          />
         </div>
         
         <h1 className="text-4xl md:text-[44px] font-bold text-center leading-tight mb-4 tracking-wide text-white">

@@ -53,3 +53,6 @@ backend/logs/
 backend/voice.wav
 backend/temp_*.mp3
 backend/temp_*.pdf
+
+# Databases
+*.db

@@ -53,9 +53,23 @@ function Layout() {
     setChatHistory([]);
   };
 
+  const deleteHistoryItem = async (id) => {
+    try {
+      await API.delete(`/chat/${id}`);
+      setChatId(prev => prev + 1);
+    } catch (err) {
+      console.error("Failed to delete chat history item", err);
+    }
+  };
+
   return (
     <div className="flex bg-[#0b0a10] min-h-screen text-[#e9e6f9] font-sans">
-      <Sidebar chatHistory={chatHistory} restoreSession={restoreSession} startNewChat={startNewChat} />
+      <Sidebar 
+        chatHistory={chatHistory} 
+        restoreSession={restoreSession} 
+        startNewChat={startNewChat} 
+        onDeleteHistoryItem={deleteHistoryItem} 
+      />
       <div className="flex-1 flex flex-col relative overflow-hidden h-screen">
         {/* Ambient Dot Pattern Background */}
         <div className="absolute top-0 left-0 w-full h-full dot-pattern opacity-50 pointer-events-none -z-20"></div>
@@ -92,7 +106,13 @@ function Layout() {
         </header>
 
         <main className="flex-1 overflow-y-auto px-8 lg:px-12 pb-12 z-10 relative flex flex-col">
-          <Outlet context={{ addQuery, restoreTarget, clearRestore: () => setRestoreTarget(null), chatId }} />
+          <Outlet context={{ 
+            addQuery, 
+            restoreTarget, 
+            clearRestore: () => setRestoreTarget(null), 
+            chatId, 
+            refreshHistory: () => setChatId(prev => prev + 1) 
+          }} />
         </main>
       </div>
     </div>

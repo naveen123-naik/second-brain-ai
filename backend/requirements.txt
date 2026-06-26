@@ -21,3 +21,4 @@ langchain-huggingface
 sentence-transformers
 groq
 gTTS
+bcrypt

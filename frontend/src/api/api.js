@@ -34,13 +34,10 @@ API.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return API(originalRequest);
         } catch (refreshError) {
-          console.error("Refresh token validation failed, redirecting to login", refreshError);
+          console.error("Refresh token validation failed, clearing tokens", refreshError);
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
-          window.location.href = "/login";
         }
-      } else {
-        window.location.href = "/login";
       }
     }
     return Promise.reject(error);

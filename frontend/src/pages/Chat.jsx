@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useOutletContext } from "react-router-dom";
 import API from "../api/api";
-import { Sparkles, Send, User, DatabaseZap, X } from "lucide-react";
+import { Sparkles, Send, User, DatabaseZap, X, MoreVertical, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -11,9 +11,35 @@ function Chat() {
     { role: "assistant", text: "Neural link established. How may I access the archives for you today?" }
   ]);
   const [loading, setLoading] = useState(false);
+  const [openMenuIdx, setOpenMenuIdx] = useState(null);
   const scrollRef = useRef(null);
   const inputRef = useRef(null);
-  const { addQuery, restoreTarget, clearRestore, chatId } = useOutletContext();
+  const { addQuery, restoreTarget, clearRestore, chatId, refreshHistory } = useOutletContext();
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      if (openMenuIdx !== null) {
+        if (!e.target.closest(".menu-trigger-container")) {
+          setOpenMenuIdx(null);
+        }
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+    return () => document.removeEventListener("click", handleOutsideClick);
+  }, [openMenuIdx]);
+
+  const handleDeleteMessage = async (id) => {
+    try {
+      await API.delete(`/chat/${id}`);
+      setMessages(prev => prev.filter(m => m.id !== id));
+      setOpenMenuIdx(null);
+      if (refreshHistory) {
+        refreshHistory();
+      }
+    } catch (err) {
+      console.error("Failed to delete message", err);
+    }
+  };
 
   useEffect(() => {
     if (restoreTarget) {
@@ -33,8 +59,8 @@ function Chat() {
           { role: "assistant", text: "Neural link established. How may I access the archives for you today?" }
         ];
         res.data.forEach(chat => {
-          chatMsgs.push({ role: "user", text: chat.question });
-          chatMsgs.push({ role: "assistant", text: chat.answer });
+          chatMsgs.push({ id: chat.id, role: "user", text: chat.question });
+          chatMsgs.push({ id: chat.id, role: "assistant", text: chat.answer });
         });
         setMessages(chatMsgs);
       } catch (error) {
@@ -60,6 +86,7 @@ function Chat() {
     setQuestion("");
     setMessages(prev => [...prev, { role: "user", text: userQ }]);
     setLoading(true);
+    const startTime = Date.now();
 
     try {
       const model = localStorage.getItem("ai_model") || "gpt-4o";
@@ -75,12 +102,33 @@ function Chat() {
         creativity,
         language
       });
-      setMessages(prev => [...prev, { role: "assistant", text: res.data.answer }]);
+
+      // Enforce minimum 4 seconds loading delay
+      const elapsed = Date.now() - startTime;
+      const remaining = 4000 - elapsed;
+      if (remaining > 0) {
+        await new Promise(resolve => setTimeout(resolve, remaining));
+      }
+
+      setMessages(prev => {
+        const copy = [...prev];
+        const lastUserMsgIdx = copy.map(m => m.role).lastIndexOf("user");
+        if (lastUserMsgIdx !== -1) {
+          copy[lastUserMsgIdx].id = res.data.id;
+        }
+        return [...copy, { id: res.data.id, role: "assistant", text: res.data.answer }];
+      });
       if (addQuery) {
         addQuery(userQ, res.data.answer);
       }
     } catch (error) {
       console.error(error);
+      // Guarantee minimum loading visual duration on error
+      const elapsed = Date.now() - startTime;
+      const remaining = 4000 - elapsed;
+      if (remaining > 0) {
+        await new Promise(resolve => setTimeout(resolve, remaining));
+      }
       setMessages(prev => [...prev, { role: "assistant", text: "ERROR: Connection to Neural Context failed." }]);
     }
     setLoading(false);
@@ -97,21 +145,52 @@ function Chat() {
         {/* Chat History */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 z-10 scroll-smooth">
           {messages.map((msg, idx) => (
-            <div key={idx} className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'self-end flex-row-reverse' : 'self-start'}`}>
+            <div key={idx} className={`flex gap-4 max-w-[85%] ${msg.role === 'user' ? 'self-end flex-row-reverse' : 'self-start'} group`}>
 
               <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border ${msg.role === 'user' ? 'bg-[#1e1e2f] border-white/10' : 'bg-[#121220] border-[#b6a0ff]/30 shadow-glow-primary'}`}>
                 {msg.role === 'user' ? <User className="w-5 h-5 text-[#aba9bb]" /> : <Sparkles className="w-5 h-5 text-[#b6a0ff]" />}
               </div>
 
-              <div className={`p-4 rounded-2xl ${msg.role === 'user' ? 'bg-[#1e1e2f] text-[#e9e6f9] rounded-tr-sm' : 'glass-card border-l-[#b6a0ff]/50 rounded-tl-sm'}`}>
-                {msg.role === 'assistant' ? (
-                  <div className="markdown-body text-sm text-[#e9e6f9] font-light leading-relaxed">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+              <div className="relative flex items-center">
+                <div className={`p-4 rounded-2xl ${msg.role === 'user' ? 'bg-[#1e1e2f] text-[#e9e6f9] rounded-tr-sm' : 'glass-card border-l-[#b6a0ff]/50 rounded-tl-sm'}`}>
+                  {msg.role === 'assistant' ? (
+                    <div className="markdown-body text-sm text-[#e9e6f9] font-light leading-relaxed">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.text}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p className="leading-relaxed">
+                      {msg.text}
+                    </p>
+                  )}
+                </div>
+
+                {/* Three dots option beside the message */}
+                {msg.id && (
+                  <div className={`absolute top-1/2 -translate-y-1/2 ${msg.role === 'user' ? '-left-8' : '-right-8'} ${openMenuIdx === idx ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity z-20 menu-trigger-container`}>
+                    <div className="relative">
+                      <button
+                        onClick={() => setOpenMenuIdx(openMenuIdx === idx ? null : idx)}
+                        className="p-1.5 rounded-full hover:bg-white/10 text-[#aba9bb] hover:text-white transition-colors cursor-pointer"
+                        title="Options"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                      
+                      {openMenuIdx === idx && (
+                        <div 
+                          className={`absolute ${msg.role === 'user' ? 'left-0' : 'right-0'} mt-1 w-28 rounded-lg bg-[#13111C]/95 backdrop-blur-md border border-white/10 shadow-2xl py-1 z-30`}
+                        >
+                          <button
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-white/5 hover:text-red-300 transition-colors flex items-center gap-2 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <p className="leading-relaxed">
-                    {msg.text}
-                  </p>
                 )}
               </div>
 
@@ -119,14 +198,27 @@ function Chat() {
           ))}
 
           {loading && (
-            <div className="flex gap-4 max-w-[85%] self-start">
-              <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center border bg-[#121220] border-[#b6a0ff]/30 shadow-glow-primary">
-                <Sparkles className="w-5 h-5 text-[#b6a0ff] animate-pulse" />
+            <div className="flex gap-4 max-w-[85%] self-start animate-in fade-in duration-300">
+              <div className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center border bg-black border-[#b6a0ff]/20 shadow-glow-primary overflow-hidden flex-shrink-0">
+                <video
+                  src={`${import.meta.env.BASE_URL}logo.mp4`}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover scale-110"
+                />
               </div>
-              <div className="p-4 rounded-2xl glass-card rounded-tl-sm flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-[#primary] animate-bounce"></div>
-                <div className="w-2 h-2 rounded-full bg-[#secondary] animate-bounce delay-100"></div>
-                <div className="w-2 h-2 rounded-full bg-[#tertiary] animate-bounce delay-200"></div>
+              <div className="p-4 rounded-2xl glass-card border-l-[#b6a0ff]/50 rounded-tl-sm flex flex-col gap-2 min-w-[220px]">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#b6a0ff] animate-pulse shadow-[0_0_6px_#b6a0ff]"></div>
+                  <span className="text-[10px] text-[#b6a0ff] font-mono tracking-wider uppercase">DECRYPTING ARCHIVES...</span>
+                </div>
+                <div className="flex items-center gap-1.5 pl-3.5">
+                  <div className="w-2 h-2 rounded-full bg-[#b6a0ff] animate-bounce"></div>
+                  <div className="w-2 h-2 rounded-full bg-[#b6a0ff]/60 animate-bounce delay-100"></div>
+                  <div className="w-2 h-2 rounded-full bg-[#b6a0ff]/30 animate-bounce delay-200"></div>
+                </div>
               </div>
             </div>
           )}

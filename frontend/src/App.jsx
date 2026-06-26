@@ -36,8 +36,8 @@ const ProtectedRoute = () => {
         // Automatically attempt background login if unauthenticated
         try {
           const loginRes = await API.post("/auth/login", {
-            email: "kethavathnaveennaik1234@gmail.com",
-            password: "Naveen@123//"
+            email: import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || "kethavathnaveennaik1234@gmail.com",
+            password: import.meta.env.VITE_DEFAULT_ADMIN_PASSWORD || "Naveen@123//"
           });
           const { access_token, refresh_token, email, role } = loginRes.data;
           localStorage.setItem("access_token", access_token);
@@ -82,14 +82,24 @@ const ProtectedRoute = () => {
 };
 
 const Loading = () => (
-  <div className="flex items-center justify-center h-screen bg-[#0b0a10]">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+  <div className="flex flex-col items-center justify-center h-screen bg-[#0b0a10]">
+    <div className="relative w-32 h-32 flex items-center justify-center">
+      <div className="absolute inset-0 bg-[#b6a0ff] opacity-10 blur-2xl rounded-full animate-pulse"></div>
+      <video
+        src={`${import.meta.env.BASE_URL}logo.mp4`}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-24 h-24 rounded-full object-cover border border-purple-500/20 shadow-[0_0_30px_rgba(182,160,255,0.3)] bg-black/40"
+      />
+    </div>
   </div>
 );
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Suspense fallback={<Loading />}>
         <Routes>
           {/* Redirect authentication routes to home since login is removed */}
