@@ -12,7 +12,6 @@ from app.database import get_db
 from app.models.user import User, UserSession
 from app.utils.auth import hash_password, verify_password, create_jwt, decode_jwt, get_current_user
 from app.config import GOOGLE_CLIENT_ID, ENV
-from app.services.email_service import send_email
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
@@ -135,41 +134,19 @@ def signup(request: SignupRequest, req: Request, db: Session = Depends(get_db)):
     total_users = db.query(User).count()
     assigned_role = "admin" if total_users == 0 else "user"
     
-    # Generate 6-digit code
-    code = f"{random.randint(100000, 999999)}"
-    
     new_user = User(
         email=request.email,
         hashed_password=hash_password(request.password),
         role=assigned_role,
         auth_provider="email",
-        is_verified=False, # Needs verification
-        verification_code=code
+        is_verified=True, # Auto-verified since email sending is removed
+        verification_code=None
     )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
     
-    try:
-        subject = "Archivist AI - Verify Your Account"
-        body = (
-            f"Welcome to Archivist AI!\n\n"
-            f"Your verification code is: {code}\n\n"
-            f"Please enter this code in the application to activate your vault.\n\n"
-            f"Best regards,\n"
-            f"Archivist AI Team"
-        )
-        send_email(new_user.email, subject, body)
-    except Exception as e:
-        # Delete user if email fails so they can sign up again
-        db.delete(new_user)
-        db.commit()
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to send verification email. Please check SMTP configuration. Error: {str(e)}"
-        )
-    
-    return {"message": f"Signup successful as {assigned_role}. Verification code sent to email.", "email": new_user.email}
+    return {"message": f"Signup successful as {assigned_role}.", "email": new_user.email}
 
 @router.post("/verify-email")
 def verify_email(request: VerifyEmailRequest, db: Session = Depends(get_db)):
@@ -190,37 +167,7 @@ def verify_email(request: VerifyEmailRequest, db: Session = Depends(get_db)):
 
 @router.post("/resend-code")
 def resend_code(request: ResendCodeRequest, req: Request, db: Session = Depends(get_db)):
-    # Rate limit code resending by IP
-    client_ip = req.client.host if req.client else "unknown"
-    enforce_rate_limit(f"resend:{client_ip}", max_requests=3, period_seconds=600)
-
-    user = db.query(User).filter(User.email == request.email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found.")
-        
-    if user.is_verified:
-        raise HTTPException(status_code=400, detail="Email already verified.")
-        
-    code = f"{random.randint(100000, 999999)}"
-    user.verification_code = code
-    db.commit()
-    
-    try:
-        subject = "Archivist AI - Verify Your Account"
-        body = (
-            f"Welcome to Archivist AI!\n\n"
-            f"Your verification code is: {code}\n\n"
-            f"Please enter this code in the application to activate your vault.\n\n"
-            f"Best regards,\n"
-            f"Archivist AI Team"
-        )
-        send_email(user.email, subject, body)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to send verification email: {str(e)}"
-        )
-    return {"message": "Verification code resent successfully."}
+    raise HTTPException(status_code=400, detail="Email verification is disabled.")
 
 @router.post("/login")
 def login(request: LoginRequest, response: Response, req: Request, db: Session = Depends(get_db)):
@@ -385,7 +332,6 @@ def forgot_password(request: ForgotPasswordRequest, req: Request, db: Session = 
 
     user = db.query(User).filter(User.email == request.email).first()
     if not user:
-        # To prevent user enumeration attacks, return a generic success message
         return {"message": "If this email is registered, a password reset link has been sent."}
     
     # Generate password reset token
@@ -397,25 +343,9 @@ def forgot_password(request: ForgotPasswordRequest, req: Request, db: Session = 
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
     reset_link = f"{frontend_url}/reset-password?token={reset_token}"
     
-    try:
-        subject = "Archivist AI - Reset Your Passphrase"
-        body = (
-            f"Hello,\n\n"
-            f"You requested a passphrase reset for your Archivist AI vault.\n"
-            f"Click the link below to verify your request and set a new password:\n\n"
-            f"{reset_link}\n\n"
-            f"This link is valid for 15 minutes. If you did not request this, please ignore this email.\n\n"
-            f"Best regards,\n"
-            f"Archivist AI Team"
-        )
-        send_email(user.email, subject, body)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to send reset email: {str(e)}"
-        )
+    print(f"[AUTH] Password reset link for {user.email}: {reset_link}")
         
-    return {"message": "If this email is registered, a password reset link has been sent."}
+    return {"message": "If this email is registered, a password reset link has been generated."}
 
 @router.post("/reset-password")
 def reset_password(request: ResetPasswordRequest, db: Session = Depends(get_db)):
