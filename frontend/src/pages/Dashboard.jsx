@@ -6,7 +6,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import Upload from "./Upload";
-import Email from "./Email";
 import CalendarView from "./Calendar";
 
 function Dashboard() {
@@ -79,7 +78,6 @@ function Dashboard() {
   const actionCards = [
     { title: "Ask a Question", subtitle: "Query your archived data", icon: MessageSquare, id: "chat" },
     { title: "Upload Context", subtitle: "Add documents & files", icon: UploadCloud, id: "upload" },
-    { title: "Review Triage", subtitle: "Check flagged items", icon: CheckSquare, id: "email" },
     { title: "Explore Timeline", subtitle: "Browse historical data", icon: Calendar, id: "calendar" },
   ];
 
@@ -93,7 +91,6 @@ function Dashboard() {
 
   const renderInnerContent = () => {
     if (activeView === "upload") return <Upload />;
-    if (activeView === "email") return <Email />;
     if (activeView === "calendar") return <CalendarView />;
     
     if (activeView === "chat") {
