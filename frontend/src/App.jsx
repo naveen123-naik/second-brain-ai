@@ -7,7 +7,6 @@ import Layout from "./components/Layout";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Upload = lazy(() => import("./pages/Upload"));
-const Email = lazy(() => import("./pages/Email"));
 const Calendar = lazy(() => import("./pages/Calendar"));
 const Voice = lazy(() => import("./pages/Voice"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
@@ -114,7 +113,7 @@ function App() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/chat" element={<Chat />} />
               <Route path="/upload" element={<Upload />} />
-              <Route path="/email" element={<Email />} />
+              <Route path="/email" element={<Navigate to="/" replace />} />
               <Route path="/calendar" element={<Calendar />} />
               <Route path="/voice" element={<Voice />} />
               <Route path="/admin" element={<AdminDashboard />} />

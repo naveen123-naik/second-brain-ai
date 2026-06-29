@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import upload, chat, voice, email, calendar, auth, admin
+from app.routes import upload, chat, voice, calendar, auth, admin
 from app.middleware import RequestLoggingMiddleware
 import sys
 
@@ -29,7 +29,6 @@ app.add_middleware(
 app.include_router(upload.router,   prefix="/upload",   tags=["Upload"])
 app.include_router(chat.router,     prefix="/chat",     tags=["Chat"])
 app.include_router(voice.router,    prefix="/voice",    tags=["Voice"])
-app.include_router(email.router,    prefix="/email",    tags=["Email"])
 app.include_router(calendar.router, prefix="/calendar", tags=["Calendar"])
 app.include_router(auth.router)
 app.include_router(admin.router)

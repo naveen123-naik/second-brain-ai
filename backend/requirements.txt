@@ -12,13 +12,10 @@ psycopg2-binary
 python-multipart
 pypdf
 tiktoken
-whisper
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
 elevenlabs
-langchain-huggingface
-sentence-transformers
 groq
 gTTS
 bcrypt

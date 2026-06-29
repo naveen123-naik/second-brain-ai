@@ -16,9 +16,7 @@ function Navbar() {
         Chat
       </Link>
 
-      <Link to="/email" style={{ color: "white", margin: "10px" }}>
-        Email
-      </Link>
+
 
       <Link to="/calendar" style={{ color: "white", margin: "10px" }}>
         Calendar

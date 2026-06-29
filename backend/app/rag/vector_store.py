@@ -1,10 +1,6 @@
 import os
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
-# Load embedding model
-embeddings = HuggingFaceEmbeddings(
-    model_name="sentence-transformers/all-MiniLM-L6-v2"
-)
+from app.rag.embeddings import embeddings
 
 def get_user_vector_path(user_id: int) -> str:
     # Organize user vector stores under a centralized folder
