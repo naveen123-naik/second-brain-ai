@@ -41,6 +41,11 @@ try:
             "email": "admin@example.com",
             "password": "AdminSecurePassword123!",
             "name": "Admin User"
+        },
+        {
+            "email": "kethavathnaveennaik1234@gmail.com",
+            "password": "Naveen@123//",
+            "name": "Naik Naveen"
         }
     ]
     
