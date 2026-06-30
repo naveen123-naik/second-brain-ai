@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import API from "../api/api";
 import { Sparkles, MessageSquare, UploadCloud, CheckSquare, Calendar, Plus, Command, Send, Bot, X } from "lucide-react";
@@ -16,8 +16,11 @@ function Dashboard() {
   const inputRef = useRef(null);
   const { addQuery, restoreTarget, clearRestore, chatId } = useOutletContext() || {};
 
-  // Restore a previous session when user clicks history in sidebar
-  useEffect(() => {
+  const [prevRestoreTarget, setPrevRestoreTarget] = useState(null);
+  const [prevChatId, setPrevChatId] = useState(null);
+
+  if (restoreTarget !== prevRestoreTarget) {
+    setPrevRestoreTarget(restoreTarget);
     if (restoreTarget) {
       setMessages([
         { role: 'user', text: restoreTarget.question },
@@ -26,14 +29,15 @@ function Dashboard() {
       setActiveView("chat");
       clearRestore?.();
     }
-  }, [restoreTarget, clearRestore]);
+  }
 
-  useEffect(() => {
+  if (chatId !== prevChatId) {
+    setPrevChatId(chatId);
     if (chatId) {
       setMessages([]);
       setActiveView("home");
     }
-  }, [chatId]);
+  }
 
   const askAI = async () => {
     if (!question) return;

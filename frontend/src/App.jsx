@@ -31,7 +31,7 @@ const ProtectedRoute = () => {
         localStorage.setItem("profile_name", res.data.name);
         localStorage.setItem("profile_pic", res.data.profile_picture || "");
         setStatus("authenticated");
-      } catch (err) {
+      } catch {
         // Automatically attempt background login if unauthenticated
         try {
           const loginRes = await API.post("/auth/login", {

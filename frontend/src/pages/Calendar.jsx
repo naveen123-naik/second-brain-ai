@@ -10,10 +10,6 @@ function Calendar() {
   const [adding, setAdding] = useState(false);
   const [addMsg, setAddMsg] = useState("");
 
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
   const loadEvents = async () => {
     setLoading(true);
     try {
@@ -24,6 +20,12 @@ function Calendar() {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadEvents();
+    });
+  }, []);
 
   const handleAddEvent = async (e) => {
     e.preventDefault();

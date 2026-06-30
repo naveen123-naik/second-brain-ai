@@ -41,7 +41,9 @@ function Chat() {
     }
   };
 
-  useEffect(() => {
+  const [prevRestoreTarget, setPrevRestoreTarget] = useState(null);
+  if (restoreTarget !== prevRestoreTarget) {
+    setPrevRestoreTarget(restoreTarget);
     if (restoreTarget) {
       setMessages([
         { role: 'user', text: restoreTarget.question },
@@ -49,7 +51,7 @@ function Chat() {
       ]);
       clearRestore();
     }
-  }, [restoreTarget, clearRestore]);
+  }
 
   useEffect(() => {
     const loadConversation = async () => {

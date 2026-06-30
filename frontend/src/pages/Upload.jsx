@@ -9,7 +9,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 function Upload() {
-  const [msg, setMsg] = useState("");
   const [uploadMeta, setUploadMeta] = useState(null); // { filename, chunks }
   const [loading, setLoading] = useState(false);
   const [summarizing, setSummarizing] = useState(false);
@@ -49,7 +48,6 @@ function Upload() {
             const reportRes = await API.get(`/upload/report?filename=${encodeURIComponent(res.data.filename)}`);
             if (reportRes.data && !reportRes.data.error) {
               setReport(reportRes.data);
-              setMsg("Context assimilation and analysis complete.");
             }
           } catch (rErr) {
             console.error("Report fetch error:", rErr);
@@ -104,7 +102,6 @@ function Upload() {
 
     setFileName(file.name);
     setLoading(true);
-    setMsg("");
     setReport(null);
     setUploadMeta(null);
     setError("");
@@ -127,7 +124,6 @@ function Upload() {
       setDocMessages([
         { role: "assistant", text: `Successfully indexed **${res.data.filename}** into the RAG vector database. How can I help you extract insights from this file?` }
       ]);
-      setMsg("Assimilation complete.");
       setLoading(false);
 
     } catch (err) {
@@ -141,7 +137,6 @@ function Upload() {
     if (!uploadMeta) return;
     setSummarizing(true);
     setError("");
-    setMsg("Generating intelligence report...");
     try {
       const analyzeRes = await API.post("/upload/analyze", {
         filename: uploadMeta.filename
@@ -151,7 +146,6 @@ function Upload() {
         setError(analyzeRes.data.message || "Failed to analyze document.");
       } else {
         setReport(analyzeRes.data);
-        setMsg("Context assimilation and analysis complete.");
       }
     } catch (err) {
       console.error(err);
@@ -169,7 +163,6 @@ function Upload() {
       setReport(null);
       setFileName("");
       setDocMessages([]);
-      setMsg("");
       setError("");
     } catch (err) {
       console.error(err);

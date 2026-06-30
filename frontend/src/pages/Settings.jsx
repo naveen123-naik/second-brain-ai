@@ -15,8 +15,6 @@ function Settings() {
   const [profileName, setProfileName] = useState(localStorage.getItem("profile_name") || "");
   const [email, setEmail] = useState(localStorage.getItem("email") || "");
   const [profilePic, setProfilePic] = useState(localStorage.getItem("profile_pic") || "https://api.dicebear.com/7.x/bottts/svg?seed=Archivist");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
   
   // Security States
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
@@ -67,7 +65,7 @@ function Settings() {
       try {
         const res = await API.get("/admin/sessions");
         setSessions(res.data);
-      } catch (err) {
+      } catch {
         // Safe fallback if not admin/failure
         setSessions([
           { id: 1, device_type: "Chrome (Windows) - Current Device", ip_address: "127.0.0.1", location: "Hyderabad, India", last_active: new Date().toISOString() }
@@ -96,31 +94,14 @@ function Settings() {
     }
   };
 
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    if (!currentPassword || !newPassword) return;
-    setLoading(true);
-    try {
-      await API.post("/auth/change-password", {
-        current_password: currentPassword,
-        new_password: newPassword
-      });
-      setCurrentPassword("");
-      setNewPassword("");
-      showSuccess("Vault passphrase updated successfully.");
-    } catch (err) {
-      showError(err.response?.data?.detail || "Failed to update passphrase.");
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleRevokeSession = async (sessionId) => {
     try {
       await API.post(`/admin/sessions/${sessionId}/revoke`);
       setSessions(prev => prev.filter(s => s.id !== sessionId));
       showSuccess("Device session terminated.");
-    } catch (err) {
+    } catch {
       showError("Failed to revoke session.");
     }
   };
@@ -169,7 +150,7 @@ function Settings() {
       downloadAnchor.click();
       downloadAnchor.remove();
       showSuccess("Chat logs exported as JSON file.");
-    } catch (err) {
+    } catch {
       showError("Export failed: chat logs empty or connection error.");
     }
   };
@@ -179,18 +160,13 @@ function Settings() {
       try {
         await API.post("/chat/new");
         showSuccess("Conversational vaults purged successfully.");
-      } catch (err) {
+      } catch {
         showError("Purge request failed.");
       }
     }
   };
 
-  const handleDeleteAccount = () => {
-    if (confirm("WARNING: Deleting your account will completely delete all personal knowledge nodes, FAISS indices, and credentials. Are you sure?")) {
-      localStorage.clear();
-      navigate("/login");
-    }
-  };
+
 
   const handleLogout = async () => {
     try {
@@ -309,8 +285,12 @@ function Settings() {
                   />
                 </div>
               </div>
-              <button type="submit" className="bg-primary-gradient px-6 py-2.5 rounded-lg text-black font-semibold text-xs tracking-wider">
-                SAVE PROFILE DETAILS
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="bg-primary-gradient px-6 py-2.5 rounded-lg text-black font-semibold text-xs tracking-wider disabled:opacity-50"
+              >
+                {loading ? "SAVING..." : "SAVE PROFILE DETAILS"}
               </button>
             </form>
           </div>

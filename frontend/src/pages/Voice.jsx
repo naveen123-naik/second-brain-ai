@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import API from "../api/api";
 import { Mic, Activity, MessageSquare, Sparkles, Volume2, VolumeX, Headphones, Radio } from "lucide-react";
 
+const getNow = () => Date.now();
+
 function Voice() {
   const [transcript, setTranscript] = useState("");
   const [answer, setAnswer] = useState("");
@@ -21,6 +23,14 @@ function Voice() {
   const analyserRef = useRef(null);
   const streamRef = useRef(null);
   const hasSpokenRef = useRef(false);
+
+  const cleanupAudioAnalyser = () => {
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close().catch(e => console.error("Error closing AudioContext:", e));
+    }
+    audioContextRef.current = null;
+    analyserRef.current = null;
+  };
 
   // Fetch the initial greeting TTS base64 from the backend on load
   useEffect(() => {
@@ -47,14 +57,6 @@ function Voice() {
       }
     };
   }, []);
-
-  const cleanupAudioAnalyser = () => {
-    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-      audioContextRef.current.close().catch(e => console.error("Error closing AudioContext:", e));
-    }
-    audioContextRef.current = null;
-    analyserRef.current = null;
-  };
 
   const activateLink = () => {
     if (audioRef.current) {
@@ -129,7 +131,7 @@ function Voice() {
       const SILENCE_DURATION_MS = 1500; // Stop after 1.5s of silence
       const MAX_RECORDING_MS = 15000; // Hard stop at 15s
       const INITIAL_SILENCE_TIMEOUT_MS = 5000; // Stop after 5s if user hasn't spoken yet
-      const startTime = Date.now();
+      const startTime = getNow();
 
       const checkVolume = () => {
         if (!isRecordingRef.current) return;
@@ -142,7 +144,7 @@ function Voice() {
         const avg = total / bufferLength;
         setVolumeLevel(avg);
 
-        const now = Date.now();
+        const now = getNow();
         const duration = now - startTime;
 
         if (avg > SILENCE_THRESHOLD) {
