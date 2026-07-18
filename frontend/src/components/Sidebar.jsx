@@ -5,12 +5,10 @@ import {
   MessageSquare,
   UploadCloud,
   CheckSquare,
-  Calendar,
   Mic,
   Settings,
   HelpCircle,
   Network,
-  ShieldAlert,
   Trash2,
   MoreVertical
 } from "lucide-react";
@@ -35,9 +33,7 @@ function Sidebar({ chatHistory = [], restoreSession, startNewChat, onDeleteHisto
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
     { name: "Neural Chat", path: "/chat", icon: MessageSquare },
     { name: "Upload Context", path: "/upload", icon: UploadCloud },
-    { name: "Timeline", path: "/calendar", icon: Calendar },
     { name: "Voice Sync", path: "/voice", icon: Mic },
-    { name: "Security & Admin", path: "/admin", icon: ShieldAlert },
   ];
 
   const secondaryLinks = [

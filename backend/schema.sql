@@ -63,7 +63,7 @@ CREATE TABLE documents (
 
 CREATE INDEX idx_documents_user ON documents(user_id);
 
--- 7. Provision Default Admin Account
+-- 7. Provision Default User Account
 -- Email: admin@example.com
 -- Default password: AdminSecurePassword123!
 -- The password hash below corresponds to the bcrypt hash of "AdminSecurePassword123!"
@@ -79,15 +79,15 @@ INSERT INTO users (
 ) VALUES (
     'admin@example.com',
     '$2b$12$vUNUjhbqOMroGfsAW.5bSuHP6YJHO.hn3lssgK7t799UoO4kh5Dye', -- Bcrypt hash of "AdminSecurePassword123!"
-    'admin',
+    'user',
     TRUE,
     TRUE,
-    'Admin User',
+    'Default User',
     'email',
     'https://api.dicebear.com/7.x/bottts/svg?seed=Archivist'
 ) ON CONFLICT (email) DO UPDATE SET
     hashed_password = EXCLUDED.hashed_password,
-    role = 'admin',
+    role = 'user',
     is_active = TRUE,
     is_verified = TRUE,
-    name = 'Admin User';
+    name = 'Default User';

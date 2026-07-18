@@ -1,12 +1,11 @@
 import { useState, useRef } from "react";
 import { useOutletContext } from "react-router-dom";
 import API from "../api/api";
-import { Sparkles, MessageSquare, UploadCloud, CheckSquare, Calendar, Plus, Command, Send, Bot, X } from "lucide-react";
+import { Sparkles, MessageSquare, UploadCloud, CheckSquare, Plus, Command, Send, Bot, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import Upload from "./Upload";
-import CalendarView from "./Calendar";
 
 function Dashboard() {
   const [question, setQuestion] = useState("");
@@ -82,7 +81,6 @@ function Dashboard() {
   const actionCards = [
     { title: "Ask a Question", subtitle: "Query your archived data", icon: MessageSquare, id: "chat" },
     { title: "Upload Context", subtitle: "Add documents & files", icon: UploadCloud, id: "upload" },
-    { title: "Explore Timeline", subtitle: "Browse historical data", icon: Calendar, id: "calendar" },
   ];
 
   const handleCardClick = (id) => {
@@ -95,7 +93,6 @@ function Dashboard() {
 
   const renderInnerContent = () => {
     if (activeView === "upload") return <Upload />;
-    if (activeView === "calendar") return <CalendarView />;
     
     if (activeView === "chat") {
       return (

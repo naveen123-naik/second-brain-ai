@@ -130,9 +130,7 @@ def signup(request: SignupRequest, req: Request, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="User with this email already exists.")
     
-    # Check if it's the very first user in the system to auto-assign "admin" role
-    total_users = db.query(User).count()
-    assigned_role = "admin" if total_users == 0 else "user"
+    assigned_role = "user"
     
     new_user = User(
         email=request.email,
@@ -270,8 +268,7 @@ def google_signin(request: GoogleLoginRequest, response: Response, req: Request,
     
     if not user:
         # Create Google OAuth user
-        total_users = db.query(User).count()
-        assigned_role = "admin" if total_users == 0 else "user"
+        assigned_role = "user"
         user = User(
             email=email,
             google_id=google_id,

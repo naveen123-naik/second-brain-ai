@@ -41,9 +41,8 @@ function Chat() {
     }
   };
 
-  const [prevRestoreTarget, setPrevRestoreTarget] = useState(null);
-  if (restoreTarget !== prevRestoreTarget) {
-    setPrevRestoreTarget(restoreTarget);
+  // Handle sidebar history item click (restoration)
+  useEffect(() => {
     if (restoreTarget) {
       setMessages([
         { role: 'user', text: restoreTarget.question },
@@ -51,29 +50,14 @@ function Chat() {
       ]);
       clearRestore();
     }
-  }
+  }, [restoreTarget]);
 
+  // Reset the screen on chatId change (e.g. click New Chat / fresh reload)
   useEffect(() => {
-    const loadConversation = async () => {
-      try {
-        const res = await API.get("/chat/history");
-        const chatMsgs = [
-          { role: "assistant", text: "Neural link established. How may I access the archives for you today?" }
-        ];
-        res.data.forEach(chat => {
-          chatMsgs.push({ id: chat.id, role: "user", text: chat.question });
-          chatMsgs.push({ id: chat.id, role: "assistant", text: chat.answer });
-        });
-        setMessages(chatMsgs);
-      } catch (error) {
-        console.error("Failed to load chat history", error);
-      }
-    };
-
-    if (!restoreTarget) {
-      loadConversation();
-    }
-  }, [chatId, restoreTarget]);
+    setMessages([
+      { role: "assistant", text: "Neural link established. How may I access the archives for you today?" }
+    ]);
+  }, [chatId]);
 
   useEffect(() => {
     if (scrollRef.current) {

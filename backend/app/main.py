@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import upload, chat, voice, calendar, auth, admin
+from app.routes import upload, chat, voice, auth
 from app.middleware import RequestLoggingMiddleware
 import sys
 
@@ -44,58 +44,36 @@ def on_startup():
         finally:
             db_migration.close()
 
-        # Provision admins
+        # Provision default user
         db = SessionLocal()
         try:
-            admins = [
-                {
-                    "email": "admin@example.com",
-                    "password": "AdminSecurePassword123!",
-                    "name": "Admin User"
-                },
-                {
-                    "email": "kethavathnaveennaik1234@gmail.com",
-                    "password": "Naveen@123//",
-                    "name": "Naik Naveen"
-                }
-            ]
-            env_email = os.getenv("ADMIN_EMAIL")
-            if env_email and env_email != "admin@example.com":
-                admins.append({
-                    "email": env_email,
-                    "password": os.getenv("ADMIN_PASSWORD", "AdminSecurePassword123!"),
-                    "name": os.getenv("ADMIN_NAME", "Admin User")
-                })
-            for admin_data in admins:
-                email = admin_data["email"]
-                password = admin_data["password"]
-                name = admin_data["name"]
-                existing_admin = db.query(User).filter(User.email == email).first()
-                if not existing_admin:
-                    new_admin = User(
-                        email=email,
-                        hashed_password=hash_password(password),
-                        name=name,
-                        auth_provider="email",
-                        profile_picture="https://api.dicebear.com/7.x/bottts/svg?seed=Archivist",
-                        role="admin",
-                        is_active=True,
-                        is_verified=True
-                    )
-                    db.add(new_admin)
-                    db.commit()
-                    print(f"Database Startup: Seeded admin ({email})")
-                else:
-                    existing_admin.hashed_password = hash_password(password)
-                    existing_admin.name = name
-                    existing_admin.auth_provider = "email"
-                    existing_admin.is_active = True
-                    existing_admin.is_verified = True
-                    existing_admin.role = "admin"
-                    db.commit()
-                    print(f"Database Startup: Updated admin ({email})")
+            email = os.getenv("ADMIN_EMAIL", "kethavathnaveennaik1234@gmail.com")
+            password = os.getenv("ADMIN_PASSWORD", "Naveen@123//")
+            name = os.getenv("ADMIN_NAME", "Naik Naveen")
+            
+            existing_user = db.query(User).filter(User.email == email).first()
+            if not existing_user:
+                new_user = User(
+                    email=email,
+                    hashed_password=hash_password(password),
+                    name=name,
+                    auth_provider="email",
+                    profile_picture="https://api.dicebear.com/7.x/bottts/svg?seed=Archivist",
+                    role="user",
+                    is_active=True,
+                    is_verified=True
+                )
+                db.add(new_user)
+                db.commit()
+                print(f"Database Startup: Seeded default user ({email})")
+            else:
+                existing_user.hashed_password = hash_password(password)
+                existing_user.name = name
+                existing_user.role = "user"
+                db.commit()
+                print(f"Database Startup: Updated default user ({email})")
         except Exception as e:
-            print("Database Startup: Failed to provision admins:", e)
+            print("Database Startup: Failed to provision default user:", e)
             db.rollback()
         finally:
             db.close()
@@ -121,9 +99,7 @@ app.add_middleware(
 app.include_router(upload.router,   prefix="/upload",   tags=["Upload"])
 app.include_router(chat.router,     prefix="/chat",     tags=["Chat"])
 app.include_router(voice.router,    prefix="/voice",    tags=["Voice"])
-app.include_router(calendar.router, prefix="/calendar", tags=["Calendar"])
 app.include_router(auth.router)
-app.include_router(admin.router)
 
 # ── Custom Error Logging Exception Handlers ─────────────────────────────────
 from fastapi.exceptions import RequestValidationError

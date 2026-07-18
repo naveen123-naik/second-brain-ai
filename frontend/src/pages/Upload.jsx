@@ -22,6 +22,8 @@ function Upload() {
   const [docMessages, setDocMessages] = useState([]);
   const [queryLoading, setQueryLoading] = useState(false);
   
+  const [pendingQuery, setPendingQuery] = useState("");
+  const fileInputRef = useRef(null);
   const chatEndRef = useRef(null);
 
   // Auto-scroll chat to bottom
@@ -31,34 +33,7 @@ function Upload() {
     }
   }, [docMessages, queryLoading]);
 
-  // Check active document on mount
-  useEffect(() => {
-    const checkActiveDoc = async () => {
-      try {
-        const res = await API.get("/upload/active");
-        if (res.data && res.data.active) {
-          setUploadMeta({ filename: res.data.filename, chunks: res.data.chunks });
-          setFileName(res.data.filename);
-          setDocMessages([
-            { role: "assistant", text: `Neural link active. I have loaded context from **${res.data.filename}** (${res.data.chunks} chunks indexed). How may I assist you with this document?` }
-          ]);
-          
-          // Check if report exists
-          try {
-            const reportRes = await API.get(`/upload/report?filename=${encodeURIComponent(res.data.filename)}`);
-            if (reportRes.data && !reportRes.data.error) {
-              setReport(reportRes.data);
-            }
-          } catch (rErr) {
-            console.error("Report fetch error:", rErr);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch active document status:", err);
-      }
-    };
-    checkActiveDoc();
-  }, []);
+  // Active document checking on mount removed to allow clean Standby State on reload.
 
   const askDocAI = async () => {
     if (!docQuery.trim() || !uploadMeta) return;
@@ -93,6 +68,47 @@ function Upload() {
     setQueryLoading(false);
   };
 
+  const queryDocumentDirect = async (filename, chunks, questionText) => {
+    setDocMessages(prev => [
+      ...prev, 
+      { role: "user", text: questionText }
+    ]);
+    setQueryLoading(true);
+
+    try {
+      const res = await API.post("/upload/query", { 
+        question: questionText,
+        history: [
+          { 
+            role: "assistant", 
+            content: `Successfully indexed **${filename}** into the RAG vector database. How can I help you extract insights from this file?` 
+          },
+          {
+            role: "user",
+            content: questionText
+          }
+        ]
+      });
+      
+      if (res.data.error) {
+        setDocMessages(prev => [...prev, { role: "assistant", text: `Error: ${res.data.message || "Failed to query document"}` }]);
+      } else {
+        setDocMessages(prev => [...prev, { role: "assistant", text: res.data.answer }]);
+      }
+    } catch (err) {
+      console.error(err);
+      setDocMessages(prev => [...prev, { role: "assistant", text: "Error: Connection to RAG Query Engine failed." }]);
+    }
+    setQueryLoading(false);
+  };
+
+  const handleStandbyAsk = () => {
+    if (!docQuery.trim()) return;
+    setPendingQuery(docQuery.trim());
+    setDocQuery("");
+    fileInputRef.current?.click();
+  };
+
   // Accordion active topic index
   const [expandedTopic, setExpandedTopic] = useState(0);
 
@@ -121,10 +137,14 @@ function Upload() {
       }
 
       setUploadMeta({ filename: res.data.filename, chunks: res.data.chunks });
-      setDocMessages([
-        { role: "assistant", text: `Successfully indexed **${res.data.filename}** into the RAG vector database. How can I help you extract insights from this file?` }
-      ]);
+      const welcomeMsg = { role: "assistant", text: `Successfully indexed **${res.data.filename}** into the RAG vector database. How can I help you extract insights from this file?` };
+      setDocMessages([welcomeMsg]);
       setLoading(false);
+
+      if (pendingQuery) {
+        queryDocumentDirect(res.data.filename, res.data.chunks, pendingQuery);
+        setPendingQuery("");
+      }
 
     } catch (err) {
       console.error(err);
@@ -308,6 +328,7 @@ ${report.quick_takeaways?.map((t) => `✅ ${t}`).join("\n")}
                 <label className="cursor-pointer bg-primary-gradient px-8 py-3 rounded-lg text-black font-semibold tracking-wide hover:shadow-glow-primary transition-all text-xs">
                   SELECT DOCUMENT
                   <input
+                    ref={fileInputRef}
                     type="file"
                     className="hidden"
                     accept=".pdf,.txt,.doc,.docx"
@@ -338,16 +359,21 @@ ${report.quick_takeaways?.map((t) => `✅ ${t}`).join("\n")}
                 </div>
               </div>
               
-              {/* Mock input bar */}
-              <div className="border-t border-white/5 pt-4 opacity-30 pointer-events-none">
+              {/* Standby RAG input bar */}
+              <div className="border-t border-white/5 pt-4">
                 <div className="flex gap-3">
                   <input
                     type="text"
-                    className="flex-1 bg-[#121220] border border-white/10 text-white/50 px-4 py-2.5 rounded-lg text-xs"
-                    placeholder="RAG offline. Awaiting node activation..."
-                    disabled
+                    className="flex-1 bg-[#121220] border border-white/10 text-[#e9e6f9] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#00affe]/50 focus:shadow-glow-primary transition-all text-xs"
+                    placeholder="Type your question here, then click Ask AI to choose file..."
+                    value={docQuery}
+                    onChange={(e) => setDocQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleStandbyAsk()}
                   />
-                  <button className="bg-white/10 px-5 py-2.5 rounded-lg text-white/50 text-xs font-semibold">
+                  <button 
+                    onClick={handleStandbyAsk}
+                    className="bg-primary-gradient px-5 py-2.5 rounded-lg text-black text-xs font-semibold hover:shadow-glow-primary transition-all cursor-pointer"
+                  >
                     ASK AI
                   </button>
                 </div>

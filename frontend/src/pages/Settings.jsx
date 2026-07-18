@@ -16,9 +16,7 @@ function Settings() {
   const [email, setEmail] = useState(localStorage.getItem("email") || "");
   const [profilePic, setProfilePic] = useState(localStorage.getItem("profile_pic") || "https://api.dicebear.com/7.x/bottts/svg?seed=Archivist");
   
-  // Security States
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [sessions, setSessions] = useState([]);
+  // Security States (Removed)
   
   // Appearance States
   const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
@@ -60,20 +58,7 @@ function Settings() {
         console.error("Failed to load profile details", err);
       }
     };
-    // Fetch user sessions
-    const fetchSessions = async () => {
-      try {
-        const res = await API.get("/admin/sessions");
-        setSessions(res.data);
-      } catch {
-        // Safe fallback if not admin/failure
-        setSessions([
-          { id: 1, device_type: "Chrome (Windows) - Current Device", ip_address: "127.0.0.1", location: "Hyderabad, India", last_active: new Date().toISOString() }
-        ]);
-      }
-    };
     fetchProfile();
-    fetchSessions();
   }, []);
 
   const handleSaveAccount = async (e) => {
@@ -96,20 +81,7 @@ function Settings() {
 
 
 
-  const handleRevokeSession = async (sessionId) => {
-    try {
-      await API.post(`/admin/sessions/${sessionId}/revoke`);
-      setSessions(prev => prev.filter(s => s.id !== sessionId));
-      showSuccess("Device session terminated.");
-    } catch {
-      showError("Failed to revoke session.");
-    }
-  };
 
-  const handleRevokeAllDevices = () => {
-    setSessions(prev => prev.filter(s => s.id === 1)); // keep only current
-    showSuccess("All other active device sessions revoked.");
-  };
 
   const handleThemeChange = (newTheme) => {
     setTheme(newTheme);
@@ -293,81 +265,11 @@ function Settings() {
                 {loading ? "SAVING..." : "SAVE PROFILE DETAILS"}
               </button>
             </form>
-          </div>
-        )}
-
-        {/* Tab content: Security */}
-        {activeTab === "security" && (
-          <div className="space-y-8 animate-fadeIn">
-            <div>
-              <h3 className="text-xl font-bold text-white mb-1">Session & Credential Security</h3>
-              <p className="text-xs text-[#aba9bb] font-light">Manage connected devices and MFA parameters.</p>
-            </div>
-
-            {/* 2FA Toggle */}
-            <div className="flex items-center justify-between p-4 rounded-xl bg-[#121220]/40 border border-white/5">
-              <div className="flex gap-4 items-start">
-                <ShieldCheck className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" />
-                <div>
-                  <h4 className="text-sm font-semibold text-white">Two-Factor Authentication (2FA)</h4>
-                  <p className="text-xs text-[#aba9bb] leading-normal font-light">Require a mobile TOTP code to sign in and open your brain vault.</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
-                className="text-[#b6a0ff]"
-              >
-                {twoFactorEnabled ? (
-                  <span className="text-xs font-semibold px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-lg">ENABLED</span>
-                ) : (
-                  <span className="text-xs font-semibold px-3 py-1 bg-white/5 text-white/40 border border-white/10 rounded-lg">DISABLED</span>
-                )}
-              </button>
-            </div>
-
-            {/* Active Sessions */}
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <h4 className="text-sm font-semibold text-white">Active Device Sessions</h4>
-                <button 
-                  onClick={handleRevokeAllDevices}
-                  className="text-xs text-red-400 hover:underline"
-                >
-                  Revoke All Other Devices
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {sessions.map((s) => (
-                  <div key={s.id} className="p-4 bg-[#121220]/60 border border-white/5 rounded-xl flex justify-between items-center">
-                    <div className="flex gap-4">
-                      {s.device_type.toLowerCase().includes("mobile") || s.device_type.toLowerCase().includes("iphone") ? (
-                        <Smartphone className="w-4 h-4 text-[#e966ff] shrink-0" />
-                      ) : (
-                        <Laptop className="w-4 h-4 text-[#00affe] shrink-0" />
-                      )}
-                      <div>
-                        <p className="text-xs font-semibold text-white">{s.device_type}</p>
-                        <p className="text-[10px] text-[#aba9bb] font-mono mt-0.5">{s.ip_address} • {s.location}</p>
-                      </div>
-                    </div>
-                    {s.id !== 1 && (
-                      <button 
-                        onClick={() => handleRevokeSession(s.id)}
-                        className="text-xs text-red-400 hover:text-red-300 transition-colors"
-                      >
-                        Terminate
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
 
             <div className="h-[1px] w-full bg-white/5 my-6"></div>
 
-            {/* Logout Buttons */}
-            <div className="flex gap-3">
+            <div>
+              <h4 className="text-sm font-semibold text-white mb-2">Session Control</h4>
               <button 
                 onClick={handleLogout}
                 className="flex items-center gap-2 bg-[#121220] hover:bg-white/5 border border-white/10 px-5 py-2.5 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"

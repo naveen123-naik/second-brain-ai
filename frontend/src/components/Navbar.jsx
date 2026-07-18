@@ -18,10 +18,6 @@ function Navbar() {
 
 
 
-      <Link to="/calendar" style={{ color: "white", margin: "10px" }}>
-        Calendar
-      </Link>
-
       <Link to="/voice" style={{ color: "white", margin: "10px" }}>
         Voice
       </Link>

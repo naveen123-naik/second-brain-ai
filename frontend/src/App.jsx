@@ -7,9 +7,7 @@ import Layout from "./components/Layout";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Upload = lazy(() => import("./pages/Upload"));
-const Calendar = lazy(() => import("./pages/Calendar"));
 const Voice = lazy(() => import("./pages/Voice"));
-const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const Login = lazy(() => import("./pages/Login"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -114,9 +112,7 @@ function App() {
               <Route path="/chat" element={<Chat />} />
               <Route path="/upload" element={<Upload />} />
               <Route path="/email" element={<Navigate to="/" replace />} />
-              <Route path="/calendar" element={<Calendar />} />
               <Route path="/voice" element={<Voice />} />
-              <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/help" element={<Help />} />
             </Route>
