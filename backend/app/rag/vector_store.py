@@ -1,6 +1,6 @@
 import os
 from langchain_community.vectorstores import FAISS
-from app.rag.embeddings import embeddings
+from app.rag.embeddings import get_embeddings
 
 def get_user_vector_path(user_id: int) -> str:
     # Organize user vector stores under a centralized folder
@@ -14,6 +14,7 @@ def save_vector_store(chunks, user_id: int):
     path = get_user_vector_path(user_id)
     print(f"[VS] Creating vector store for user {user_id}...")
 
+    embeddings = get_embeddings()
     db = FAISS.from_documents(chunks, embeddings)
     db.save_local(path)
 
@@ -32,11 +33,18 @@ def load_vector_store(user_id: int):
 
     print(f"[VS] Loading vector store for user {user_id}...")
 
-    db = FAISS.load_local(
-        path,
-        embeddings,
-        allow_dangerous_deserialization=True
-    )
-
-    print(f"[VS] Vector store loaded for user {user_id}")
-    return db
+    embeddings = get_embeddings()
+    try:
+        db = FAISS.load_local(
+            path,
+            embeddings,
+            allow_dangerous_deserialization=True
+        )
+        print(f"[VS] Vector store loaded for user {user_id}")
+        return db
+    except Exception as e:
+        print(f"[VS Warning] Failed to load vector store for user {user_id} ({e}). Removing incompatible vector index.")
+        import shutil
+        if os.path.exists(path):
+            shutil.rmtree(path, ignore_errors=True)
+        return None

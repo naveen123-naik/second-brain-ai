@@ -119,6 +119,9 @@ async def upload_file(
         }
 
     except Exception as e:
+        import traceback
+        print(f"[Upload Error] Exception during file upload: {e}")
+        traceback.print_exc()
         return {
             "message": "Upload failed",
             "error": str(e)
