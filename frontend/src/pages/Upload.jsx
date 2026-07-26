@@ -558,7 +558,7 @@ ${report.quick_takeaways?.map((t) => `✅ ${t}`).join("\n")}
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    className="flex-1 bg-[#121220] border border-white/10 text-[#e9e6f9] px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#00affe]/50 focus:shadow-glow-primary transition-all font-sans text-xs"
+                    className="w-0 flex-1 min-w-0 bg-[#121220] border border-white/10 text-[#e9e6f9] px-3 sm:px-4 py-2.5 rounded-lg focus:outline-none focus:border-[#00affe]/50 focus:shadow-glow-primary transition-all font-sans text-xs"
                     placeholder={`Ask something about ${fileName || 'this document'}...`}
                     value={docQuery}
                     onChange={(e) => setDocQuery(e.target.value)}

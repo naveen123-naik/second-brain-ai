@@ -145,8 +145,8 @@ function Dashboard() {
 
     // Default home
     return (
-      <div className="flex flex-col items-center justify-center flex-1 w-full max-w-4xl mt-[8vh]">
-        <div className="w-20 h-20 rounded-full border border-[#a882ff]/30 bg-black flex items-center justify-center shadow-[0_0_20px_rgba(168,130,255,0.2)] mb-8 overflow-hidden">
+      <div className="flex flex-col items-center justify-center flex-1 w-full max-w-4xl mt-2 sm:mt-[6vh] min-w-0 px-1 sm:px-0">
+        <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full border border-[#a882ff]/30 bg-black flex items-center justify-center shadow-[0_0_20px_rgba(168,130,255,0.2)] mb-3 sm:mb-8 overflow-hidden shrink-0">
           <video
             src={`${import.meta.env.BASE_URL}logo.mp4`}
             autoPlay
@@ -157,26 +157,26 @@ function Dashboard() {
           />
         </div>
         
-        <h1 className="text-4xl md:text-[44px] font-bold text-center leading-tight mb-4 tracking-wide text-white">
-          Hello! How may I access <br/> the <span className="text-[#a882ff]">archives</span> for you today?
+        <h1 className="text-2xl sm:text-4xl md:text-[44px] font-bold text-center leading-tight mb-2 sm:mb-4 tracking-wide text-white">
+          Hello! How may I access <br className="hidden sm:inline" /> the <span className="text-[#a882ff]">archives</span> for you today?
         </h1>
         
-        <p className="text-[#aba9bb] text-lg mb-12 tracking-wide font-light">
+        <p className="text-[#aba9bb] text-xs sm:text-lg mb-4 sm:mb-12 tracking-wide font-light text-center px-2">
           Your neural link is active. Ask me anything or explore your data.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 w-full min-w-0">
           {actionCards.map((card, idx) => {
             const Icon = card.icon;
             return (
               <div 
                 key={idx} 
                 onClick={() => handleCardClick(card.id)}
-                className="bg-[#13111C] border border-[#2A2A35] rounded-2xl p-5 flex flex-col gap-3 hover:border-[#a882ff]/40 hover:bg-[#1A162B] transition-all cursor-pointer group"
+                className="bg-[#13111C] border border-[#2A2A35] rounded-2xl p-4 sm:p-5 flex flex-col gap-2 sm:gap-3 hover:border-[#a882ff]/40 hover:bg-[#1A162B] transition-all cursor-pointer group"
               >
                 <Icon className="w-5 h-5 text-[#4D82E5] group-hover:text-[#a882ff] transition-colors" />
                 <div>
-                  <h3 className="text-white/90 font-semibold text-[15px] mb-1">{card.title}</h3>
+                  <h3 className="text-white/90 font-semibold text-sm sm:text-[15px] mb-0.5 sm:mb-1">{card.title}</h3>
                   <p className="text-white/40 text-xs tracking-wide">{card.subtitle}</p>
                 </div>
               </div>
@@ -188,28 +188,28 @@ function Dashboard() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full justify-between items-center relative py-10">
+    <div className="flex flex-col h-full w-full justify-between items-center relative py-2 sm:py-10 min-w-0">
       
       {/* Dynamic Content Area */}
       {renderInnerContent()}
 
       {/* Floating Prompt Bar at bottom */}
-      <div className="w-full max-w-5xl mt-auto z-20 pt-8">
-        <div className="relative w-full rounded-[1.75rem] border border-white/10 bg-[#0E0C15] p-2 flex items-center shadow-2xl">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#b6a0ff]/20 to-transparent rounded-[1.75rem] blur opacity-30 -z-10 pointer-events-none"></div>
+      <div className="w-full max-w-5xl mt-auto z-20 pt-4 sm:pt-8 min-w-0">
+        <div className="relative w-full rounded-[1.5rem] sm:rounded-[1.75rem] border border-white/10 bg-[#0E0C15] p-1.5 sm:p-2 flex items-center shadow-2xl min-w-0 overflow-hidden">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#b6a0ff]/20 to-transparent rounded-[1.5rem] sm:rounded-[1.75rem] blur opacity-30 -z-10 pointer-events-none"></div>
           
-          <div className="flex-1 flex items-center bg-[#15131F] border border-white/5 rounded-3xl p-1.5 pl-3 focus-within:border-[#a882ff]/30 focus-within:shadow-[0_0_15px_rgba(168,130,255,0.1)] transition-all">
+          <div className="w-full flex-1 flex items-center bg-[#15131F] border border-white/5 rounded-2xl sm:rounded-3xl p-1 sm:p-1.5 pl-2.5 sm:pl-3 focus-within:border-[#a882ff]/30 focus-within:shadow-[0_0_15px_rgba(168,130,255,0.1)] transition-all min-w-0">
             <button 
               onClick={() => setActiveView("home")}
-              className="w-9 h-9 flex-shrink-0 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors mr-3"
+              className="w-8 h-8 sm:w-9 sm:h-9 flex-shrink-0 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors mr-2 sm:mr-3 cursor-pointer"
               title="Return Home"
             >
-              <Plus className={`w-5 h-5 text-white/70 transition-transform ${activeView !== 'home' ? 'rotate-45' : ''}`} />
+              <Plus className={`w-4 h-4 sm:w-5 sm:h-5 text-white/70 transition-transform ${activeView !== 'home' ? 'rotate-45' : ''}`} />
             </button>
             
             <input
               ref={inputRef}
-              className="flex-1 bg-transparent text-white/90 placeholder:text-white/30 text-lg outline-none font-light py-2 min-w-10"
+              className="w-0 flex-1 min-w-0 bg-transparent text-white/90 placeholder:text-white/30 text-sm sm:text-lg outline-none font-light py-1.5 sm:py-2"
               placeholder="Transmit prompt..."
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
@@ -219,14 +219,14 @@ function Dashboard() {
             {question && (
               <button 
                 onClick={() => { setQuestion(""); inputRef.current?.focus(); }}
-                className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors mr-2"
+                className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 flex items-center justify-center rounded-full text-white/40 hover:text-white hover:bg-white/10 transition-colors mr-1 sm:mr-2 cursor-pointer"
                 title="Clear prompt"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             )}
             
-            <div className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-white/10 bg-[#0B0A10] text-white/30 mr-3">
+            <div className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-white/10 bg-[#0B0A10] text-white/30 mr-3 shrink-0">
               <Command className="w-3.5 h-3.5" />
               <span className="text-xs font-mono">↵</span>
             </div>
@@ -234,7 +234,7 @@ function Dashboard() {
             <button
               onClick={askAI}
               disabled={loading || !question}
-              className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-2xl bg-[#a882ff] hover:bg-[#b6a0ff] hover:shadow-[0_0_15px_rgba(168,130,255,0.4)] disabled:opacity-50 transition-all text-white"
+              className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 flex items-center justify-center rounded-xl sm:rounded-2xl bg-[#a882ff] hover:bg-[#b6a0ff] hover:shadow-[0_0_15px_rgba(168,130,255,0.4)] disabled:opacity-50 transition-all text-white cursor-pointer"
             >
               <Send className="w-4 h-4 ml-0.5" />
             </button>

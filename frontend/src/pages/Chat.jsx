@@ -211,11 +211,11 @@ function Chat() {
         </div>
 
         {/* Input Bar */}
-        <div className="p-6 border-t border-white/5 bg-[#0d0d1a]/50 backdrop-blur-md z-10">
-          <div className="relative">
+        <div className="p-3 sm:p-6 border-t border-white/5 bg-[#0d0d1a]/50 backdrop-blur-md z-10 min-w-0">
+          <div className="relative w-full flex items-center min-w-0">
             <input
               ref={inputRef}
-              className="w-full bg-[#121220] border border-white/10 text-[#e9e6f9] p-4 pl-6 pr-24 rounded-full focus:outline-none focus:border-[#b6a0ff]/50 focus:shadow-glow-primary transition-all duration-300 font-sans"
+              className="w-full bg-[#121220] border border-white/10 text-[#e9e6f9] py-3 sm:py-4 pl-4 sm:pl-6 pr-20 sm:pr-24 rounded-full focus:outline-none focus:border-[#b6a0ff]/50 focus:shadow-glow-primary transition-all duration-300 font-sans text-sm sm:text-base min-w-0"
               placeholder="Transmit prompt..."
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
@@ -224,17 +224,17 @@ function Chat() {
             {question && (
               <button
                 onClick={() => { setQuestion(""); inputRef.current?.focus(); }}
-                className="absolute right-14 top-2.5 p-2 rounded-full text-[#aba9bb] hover:text-white hover:bg-white/10 transition-colors"
+                className="absolute right-11 sm:right-14 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-full text-[#aba9bb] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                 title="Clear prompt"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             )}
             <button
               onClick={askAI}
-              className="absolute right-3 top-2.5 p-2 rounded-full hover:bg-white/10 text-[#00affe] transition-colors"
+              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 rounded-full hover:bg-white/10 text-[#00affe] transition-colors cursor-pointer"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
