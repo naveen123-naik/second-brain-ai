@@ -19,55 +19,93 @@ const Help = lazy(() => import("./pages/Help"));
 const ProtectedRoute = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState("loading");
+  const [statusMsg, setStatusMsg] = useState("Connecting to Neural Vault...");
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await API.get("/auth/me");
-        localStorage.setItem("email", res.data.email);
-        localStorage.setItem("role", res.data.role);
-        localStorage.setItem("profile_name", res.data.name);
-        localStorage.setItem("profile_pic", res.data.profile_picture || "");
-        setStatus("authenticated");
-      } catch {
-        // Automatically attempt background login if unauthenticated
-        try {
-          const loginRes = await API.post("/auth/login", {
-            email: import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || "kethavathnaveennaik1234@gmail.com",
-            password: import.meta.env.VITE_DEFAULT_ADMIN_PASSWORD || "Naveen@123//"
-          });
-          const { access_token, refresh_token, email, role } = loginRes.data;
-          localStorage.setItem("access_token", access_token);
-          localStorage.setItem("refresh_token", refresh_token);
-          localStorage.setItem("email", email);
-          localStorage.setItem("role", role);
+    let isMounted = true;
 
-          // Get profile details
-          const meRes = await API.get("/auth/me");
-          localStorage.setItem("profile_name", meRes.data.name);
-          localStorage.setItem("profile_pic", meRes.data.profile_picture || "");
-          setStatus("authenticated");
-        } catch (loginErr) {
-          console.error("Auto-login failed:", loginErr);
-          setStatus("unauthenticated");
+    const checkAuthWithRetry = async (retries = 3, delayMs = 3000) => {
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        if (!isMounted) return;
+        try {
+          if (attempt > 1) {
+            setStatusMsg(`Waking up server (Attempt ${attempt}/${retries})...`);
+          }
+
+          // Step 1: Check existing session
+          const res = await API.get("/auth/me");
+          localStorage.setItem("email", res.data.email);
+          localStorage.setItem("role", res.data.role);
+          localStorage.setItem("profile_name", res.data.name);
+          localStorage.setItem("profile_pic", res.data.profile_picture || "");
+          if (isMounted) setStatus("authenticated");
+          return;
+        } catch {
+          // Step 2: Auto-login
+          try {
+            const loginRes = await API.post("/auth/login", {
+              email: import.meta.env.VITE_DEFAULT_ADMIN_EMAIL || "kethavathnaveennaik1234@gmail.com",
+              password: import.meta.env.VITE_DEFAULT_ADMIN_PASSWORD || "Naveen@123//"
+            });
+            const { access_token, refresh_token, email, role } = loginRes.data;
+            localStorage.setItem("access_token", access_token);
+            localStorage.setItem("refresh_token", refresh_token);
+            localStorage.setItem("email", email);
+            localStorage.setItem("role", role);
+
+            const meRes = await API.get("/auth/me");
+            localStorage.setItem("profile_name", meRes.data.name);
+            localStorage.setItem("profile_pic", meRes.data.profile_picture || "");
+            if (isMounted) setStatus("authenticated");
+            return;
+          } catch (loginErr) {
+            console.warn(`Connection attempt ${attempt} failed:`, loginErr);
+            if (attempt < retries) {
+              await new Promise((r) => setTimeout(r, delayMs));
+            }
+          }
         }
       }
+      if (isMounted) setStatus("unauthenticated");
     };
-    checkAuth();
+
+    checkAuthWithRetry();
+
+    return () => {
+      isMounted = false;
+    };
   }, [navigate]);
 
   if (status === "loading") {
-    return <Loading />;
+    return <Loading message={statusMsg} />;
   }
 
   if (status === "unauthenticated") {
+    const backendUrl = import.meta.env.VITE_API_URL || "http://localhost:8001";
+    const isLocalhost = backendUrl.includes("localhost") || backendUrl.includes("127.0.0.1");
+
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-[#0b0a10] text-white">
+      <div className="flex flex-col items-center justify-center h-screen bg-[#0b0a10] text-white p-6 text-center">
+        <div className="w-12 h-12 mb-4 rounded-full bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400">
+          ⚠️
+        </div>
         <h2 className="text-xl font-bold mb-2">Vault Connection Failed</h2>
-        <p className="text-xs text-white/50 mb-4">Could not establish background connection with the default profile.</p>
+        <p className="text-xs text-white/60 max-w-md mb-4">
+          Could not establish connection with the backend server at <code className="text-purple-400 bg-purple-950/40 px-2 py-0.5 rounded">{backendUrl}</code>.
+        </p>
+
+        {isLocalhost && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 max-w-md mb-6 text-left">
+            <p className="text-xs text-amber-300 font-semibold mb-1">💡 Action Required in Vercel:</p>
+            <p className="text-[11px] text-amber-200/80 leading-relaxed">
+              Your Vercel site is trying to reach <code className="text-amber-100 font-bold">localhost</code>. You must set <code className="text-amber-100 font-bold">VITE_API_URL</code> in Vercel Project Settings ➔ Environment Variables to your live Render backend URL, then redeploy!
+            </p>
+          </div>
+        )}
+
         <button 
           onClick={() => window.location.reload()}
-          className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-xs font-semibold"
+          className="bg-purple-600 hover:bg-purple-700 px-6 py-2.5 rounded-lg text-xs font-semibold shadow-lg shadow-purple-600/20 transition-all"
         >
           RETRY CONNECTION
         </button>
@@ -78,9 +116,10 @@ const ProtectedRoute = () => {
   return status === "authenticated" ? <Outlet /> : null;
 };
 
-const Loading = () => (
-  <div className="flex flex-col items-center justify-center h-screen bg-[#0b0a10]">
-    <div className="relative w-32 h-32 flex items-center justify-center">
+
+const Loading = ({ message }) => (
+  <div className="flex flex-col items-center justify-center h-screen bg-[#0b0a10] text-white">
+    <div className="relative w-32 h-32 flex items-center justify-center mb-4">
       <div className="absolute inset-0 bg-[#b6a0ff] opacity-10 blur-2xl rounded-full animate-pulse"></div>
       <video
         src={`${import.meta.env.BASE_URL}logo.mp4`}
@@ -91,8 +130,10 @@ const Loading = () => (
         className="w-24 h-24 rounded-full object-cover border border-purple-500/20 shadow-[0_0_30px_rgba(182,160,255,0.3)] bg-black/40"
       />
     </div>
+    <p className="text-xs text-purple-300/80 font-medium tracking-wide animate-pulse">{message || "Connecting..."}</p>
   </div>
 );
+
 
 function App() {
   return (
