@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: second-brain-ai-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    envVars:
+      - key: ENV
+        value: production
+      - key: DB_POOL_PRE_PING
+        value: "True"
+      - key: DB_USE_NULLPOOL
+        value: "False"
