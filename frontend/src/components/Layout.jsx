@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import { Outlet, useNavigate } from "react-router-dom";
-import { ChevronsLeft, Check } from "lucide-react";
+import { ChevronsLeft, ChevronsRight, Check } from "lucide-react";
 import API from "../api/api";
 
 function Layout() {
@@ -10,6 +10,25 @@ function Layout() {
   // The session to restore when sidebar item is clicked: { question, answer } | null
   const [restoreTarget, setRestoreTarget] = useState(null);
   const [chatId, setChatId] = useState(0);
+
+  // Sidebar collapse/expand state (default collapsed on mobile < 768px, expanded on desktop)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth >= 768;
+    }
+    return true;
+  });
+
+  // Handle window resize to auto collapse/expand appropriately
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        // Automatically contract on small screen resize if user hasn't explicitly opened it
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Fetch chat history from database on mount
   useEffect(() => {
@@ -65,12 +84,14 @@ function Layout() {
   return (
     <div className="flex bg-[#0b0a10] min-h-screen text-[#e9e6f9] font-sans">
       <Sidebar 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
         chatHistory={chatHistory} 
         restoreSession={restoreSession} 
         startNewChat={startNewChat} 
         onDeleteHistoryItem={deleteHistoryItem} 
       />
-      <div className="flex-1 flex flex-col relative overflow-hidden h-screen">
+      <div className="flex-1 flex flex-col relative overflow-hidden h-screen min-w-0">
         {/* Ambient Dot Pattern Background */}
         <div className="absolute top-0 left-0 w-full h-full dot-pattern opacity-50 pointer-events-none -z-20"></div>
 
@@ -80,32 +101,40 @@ function Layout() {
         </div>
 
         {/* Top Header Bar */}
-        <header className="w-full flex items-center justify-between p-6 z-10">
-          <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-white/10 text-white/50 hover:text-white hover:bg-white/5 transition-colors group">
-            <ChevronsLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+        <header className="w-full flex items-center justify-between p-4 sm:p-6 z-10 gap-2">
+          <button 
+            onClick={() => setIsSidebarOpen(prev => !prev)}
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-white/10 text-white/50 hover:text-white hover:bg-white/5 transition-colors group cursor-pointer shrink-0"
+            title={isSidebarOpen ? "Contract Sidebar" : "Expand Sidebar"}
+          >
+            {isSidebarOpen ? (
+              <ChevronsLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+            ) : (
+              <ChevronsRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+            )}
           </button>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3 bg-[#13111C] border border-white/5 px-4 py-2 rounded-full shadow-lg">
-              <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></div>
-              <span className="text-sm font-medium tracking-wide text-white/90">Neural link established</span>
-              <div className="w-5 h-5 rounded-full border border-white/10 flex items-center justify-center bg-white/5 text-white/40">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 bg-[#13111C] border border-white/5 px-3 sm:px-4 py-2 rounded-full shadow-lg max-w-[220px] sm:max-w-none">
+              <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] shrink-0"></div>
+              <span className="text-xs sm:text-sm font-medium tracking-wide text-white/90 truncate">Neural link established</span>
+              <div className="w-5 h-5 rounded-full border border-white/10 hidden sm:flex items-center justify-center bg-white/5 text-white/40 shrink-0">
                 <Check className="w-3 h-3" />
               </div>
             </div>
 
-            <div className="h-6 w-[1px] bg-white/10"></div>
+            <div className="h-6 w-[1px] bg-white/10 hidden sm:block"></div>
 
             <img
               onClick={() => navigate("/settings")}
               src={profilePic}
               alt="avatar"
-              className="w-10 h-10 rounded-full bg-[#1b1929] border border-white/10 p-0.5 cursor-pointer opacity-90 hover:opacity-100 transition-opacity shadow-[0_0_15px_rgba(182,160,255,0.4)]"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#1b1929] border border-white/10 p-0.5 cursor-pointer opacity-90 hover:opacity-100 transition-opacity shadow-[0_0_15px_rgba(182,160,255,0.4)] shrink-0"
             />
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-8 lg:px-12 pb-12 z-10 relative flex flex-col">
+        <main className="flex-1 overflow-y-auto px-4 sm:px-8 lg:px-12 pb-12 z-10 relative flex flex-col">
           <Outlet context={{ 
             addQuery, 
             restoreTarget, 
