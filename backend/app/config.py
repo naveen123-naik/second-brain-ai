@@ -24,21 +24,22 @@ def get_allowed_origins():
     """
     Returns the list of allowed CORS origins based on the current environment.
     """
-    if ENV == "production":
-        origins = []
-    else:
-        origins = [
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
-            "http://localhost:3000",
-        ]
+    origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "http://localhost:8001",
+    ]
     
     frontend_url = os.getenv("FRONTEND_URL")
     if frontend_url:
-        if "," in frontend_url:
-            origins.extend([o.strip() for o in frontend_url.split(",") if o.strip()])
-        else:
-            origins.append(frontend_url)
+        for url in frontend_url.split(","):
+            cleaned = url.strip().rstrip("/")
+            if cleaned:
+                origins.append(cleaned)
+                origins.append(f"{cleaned}/")
             
     # Return unique values
-    return list(set(origins))
+    return list(set(origins))
+
