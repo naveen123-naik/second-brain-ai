@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Outlet, useNavigate, Navigate } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import API from "./api/api";
 
 import Layout from "./components/Layout";
@@ -160,6 +161,7 @@ function App() {
           </Route>
         </Routes>
       </Suspense>
+      <Analytics />
     </BrowserRouter>
   );
 }
